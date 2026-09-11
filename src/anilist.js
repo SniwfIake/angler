@@ -1,15 +1,27 @@
 const ANILIST_URL = 'https://graphql.anilist.co';
 
+// Change this to something unique to your app — AniList uses it to identify you
+const USER_AGENT = 'AnglerAnimeAPI/1.0 (https://skibiditoilet.anonmus232.workers.dev)';
+
 export async function fetchAniList(query, variables = {}) {
   const response = await fetch(ANILIST_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
+      'User-Agent': USER_AGENT,
     },
     body: JSON.stringify({ query, variables }),
   });
-  return response.json();
+
+  const data = await response.json();
+
+  // Surface AniList errors cleanly
+  if (data.errors) {
+    return { errors: data.errors, data: null };
+  }
+
+  return data;
 }
 
 // ── Search anime ──
@@ -41,7 +53,7 @@ export async function searchAnime(query, page = 1, perPage = 20) {
   return fetchAniList(gql, { search: query, page, perPage });
 }
 
-// ── Trending / Latest ──
+// ── Trending ──
 export async function getTrending(page = 1, perPage = 20) {
   const gql = `
     query ($page: Int, $perPage: Int) {
@@ -94,7 +106,7 @@ export async function getAiring(page = 1, perPage = 20) {
   return fetchAniList(gql, { page, perPage });
 }
 
-// ── Popular (all time) ──
+// ── Popular ──
 export async function getPopular(page = 1, perPage = 20) {
   const gql = `
     query ($page: Int, $perPage: Int) {
@@ -164,7 +176,7 @@ export async function getAnimeById(id) {
   return fetchAniList(gql, { id });
 }
 
-// ── Episode list (from AniList's airing schedule) ──
+// ── Episode list ──
 export async function getEpisodes(animeId) {
   const gql = `
     query ($id: Int) {
