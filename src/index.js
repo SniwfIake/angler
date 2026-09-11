@@ -5,7 +5,7 @@ import {
   getPopular,
   getAnimeById,
   getEpisodes,
-} from './anilist.js';
+} from './jikan.js';
 import {
   searchStreaming,
   getStreamingEpisodes,
